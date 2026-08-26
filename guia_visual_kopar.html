@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KOPAR — Guía Visual y Arquitectura de la Experiencia</title>
+  <style>
+    /* ==========================================================================
+       VARIABLES Y DESIGN TOKENS DE KOPAR (Sin dependencias externas)
+       ========================================================================== */
+    :root {
+      --blue-primary: #0052ff;
+      --blue-hover: #0045d8;
+      --blue-light: #eef4ff;
+      --interactive-blue: #578bfa;
+      --midnight: #0a0b0d;
+      --pure-white: #ffffff;
+      --slate: #5b616e;
+      --ash: #8a919e;
+      --frost: #f7f8f9;
+      --cloud: #eef0f3;
+      --pewter: #dedfe2;
+      --green-positive: #27ad75;
+      --green-light: #eafaf1;
+      --red-negative: #f0616d;
+      --red-light: #fef0f1;
+      --purple-accent: #7c3aed;
+      --amber-accent: #f59e0b;
+
+      --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+      --radius-full: 9999px;
+      --radius-card: 24px;
+      --radius-subcard: 16px;
+      --radius-input: 12px;
+      --radius-badge: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--pure-white);
+      color: var(--midnight);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Layout general */
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 80px 24px;
+    }
+
+    /* Encabezado */
+    header {
+      background-color: var(--pure-white);
+      border-bottom: 1px solid var(--pewter);
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background-color: var(--blue-primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--midnight);
+    }
+
+    .brand-badge {
+      background-color: var(--frost);
+      border: 1px solid var(--pewter);
+      color: var(--slate);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+    }
+
+    /* Secciones */
+    .section-title-box {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .section-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--blue-primary);
+      margin-bottom: 4px;
+    }
+
+    .section-heading {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--midnight);
+    }
+
+    .section-desc {
+      font-size: 15px;
+      color: var(--slate);
+      max-width: 650px;
+      margin-top: 4px;
+    }
+
+    /* Tarjetas principales */
+    .card {
+      background-color: var(--pure-white);
+      border: 1px solid var(--pewter);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .card-frost {
+      background-color: var(--frost);
+    }
+
+    /* Grilla de 3 pilares */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+
+    .feature-card {
+      background: var(--pure-white);
+      border: 1px solid var(--pewter);
+      border-radius: var(--radius-subcard);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      background-color: var(--cloud);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue-primary);
+      font-weight: 700;
+    }
+
+    .feature-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--midnight);
+    }
+
+    .feature-text {
+      font-size: 14px;
+      color: var(--slate);
+      line-height: 1.45;
+    }
+
+    /* ==========================================================================
+       MAPA DE PANTALLAS Y ESTRUCTURA (INTERACTIVO)
+       ========================================================================== */
+    .screens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .screen-item {
+      background: var(--pure-white);
+      border: 1px solid var(--pewter);
+      border-radius: var(--radius-subcard);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .screen-item:hover {
+      border-color: var(--blue-primary);
+      background-color: var(--frost);
+      transform: translateY(-2px);
+    }
+
+    .screen-item.active {
+      border-color: var(--blue-primary);
+      background-color: var(--blue-light);
+      box-shadow: 0 0 0 1px var(--blue-primary);
+    }
+
+    .screen-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-tab {
+      background-color: #e0e9fe;
+      color: var(--blue-primary);
+    }
+
+    .badge-modal {
+      background-color: #f3e8ff;
+      color: var(--purple-accent);
+    }
+
+    .badge-auth {
+      background-color: #fef3c7;
+      color: #b45309;
+    }
+
+    .screen-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--midnight);
+      margin-bottom: 4px;
+    }
+
+    .screen-summary {
+      font-size: 13px;
+      color: var(--slate);
+      line-height: 1.4;
+    }
+
+    /* Detalle interactivo de pantalla seleccionada */
+    .screen-detail-box {
+      background-color: var(--pure-white);
+      border: 1px solid var(--pewter);
+      border-radius: var(--radius-subcard);
+      padding: 24px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .screen-detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--pewter);
+      padding-bottom: 14px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .detail-column {
+      background-color: var(--frost);
+      border: 1px solid var(--pewter);
+      border-radius: var(--radius-input);
+      padding: 14px;
+    }
+
+    .detail-col-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--slate);
+      margin-bottom: 8px;
+    }
+
+    .detail-col-list {
+      list-style: none;
+      font-size: 13px;
+      color: var(--midnight);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .detail-col-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .detail-col-list li::before {
+      content: "•";
+      color: var(--blue-primary);
+      font-weight: bold;
+    }
+
+    /* ==========================================================================
+       DIAGRAMA DE FLUJO DE LA EXPERIENCIA (USER JOURNEY)
+       ========================================================================== */
+    .flow-steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: relative;
+      margin-top: 20px;
+    }
+
+    .flow-step-card {
+      background: var(--pure-white);
+      border: 1px solid var(--pewter);
+      border-radius: var(--radius-subcard);
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 18px;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .step-number-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-full);
+      background-color: var(--blue-primary);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .step-number-sub {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.9;
+    }
+
+    .step-body-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--midnight);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .step-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      background-color: var(--cloud);
+      color: var(--slate);
+    }
+
+    .step-body-desc {
+      font-size: 14px;
+      color: var(--slate);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .step-actions-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .step-action-tag {
+      background-color: var(--frost);
+      border: 1px solid var(--pewter);
+      border-radius: var(--radius-full);
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--midnight);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .flow-connector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 12px;
+      color: var(--ash);
+      font-weight: bold;
+    }
+
+    /* ==========================================================================
+       MAPA DE RELACIÓN Y FLUJO DE DATOS
+       ========================================================================== */
+    .data-flow-svg-container {
+      width: 100%;
+      overflow-x: auto;
+      background: var(--frost);
+      border: 1px solid var(--pewter);
+      border-radius: var(--radius-subcard);
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    svg.data-flow-diagram {
+      width: 100%;
+      min-width: 750px;
+      height: auto;
+    }
+
+    /* ==========================================================================
+       GLOSARIO Y CONCEPTOS CLAVE
+       ========================================================================== */
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .glossary-card {
+      background-color: var(--pure-white);
+      border: 1px solid var(--pewter);
+      border-radius: var(--radius-subcard);
+      padding: 18px;
+    }
+
+    .glossary-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .glossary-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .glossary-term {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--midnight);
+    }
+
+    .glossary-def {
+      font-size: 13px;
+      color: var(--slate);
+      line-height: 1.45;
+    }
+
+    /* ==========================================================================
+       FOOTER & BOTONES
+       ========================================================================== */
+    .btn-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background-color: var(--blue-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--blue-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--pure-white);
+      border-color: var(--pewter);
+      color: var(--midnight);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--frost);
+    }
+
+    footer {
+      border-top: 1px solid var(--pewter);
+      padding: 32px 0;
+      margin-top: 48px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--slate);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .flow-step-card {
+        grid-template-columns: 1fr;
+      }
+      .step-number-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 15px;
+      }
+      .container {
+        padding: 20px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA SUPERIOR -->
+  <header>
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-logo">K</div>
+        <div>
+          <h1 class="brand-title">KOPAR</h1>
+        </div>
+      </div>
+      <div class="brand-badge">Guía Visual de Aprendizaje UX & Producto</div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- HERO INTRODUCTORIO -->
+    <div class="section-title-box" style="margin-top: 12px;">
+      <div>
+        <div class="section-tag">Visión General</div>
+        <h2 class="section-heading">¿Qué es KOPAR y cómo funciona?</h2>
+        <p class="section-desc">
+          Una aplicación pensada para que personas que viven juntas (parejas, compañeros de piso o familias) 
+          compartan gastos sin estrés, lleven el control de un presupuesto mensual y salden deudas fácilmente.
+        </p>
+      </div>
+    </div>
+
+    <!-- 3 PILARES ESENCIALES -->
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon-box">1</div>
+        <h3 class="feature-title">¿Qué problema resuelve?</h3>
+        <p class="feature-text">
+          Elimina la necesidad de usar tablas de Excel complejas o hacer cuentas manuales interminables. Permite que cualquiera registre lo que pagó (supermercado, arriendo, servicios) y calcula al instante quién le debe a quién.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">2</div>
+        <h3 class="feature-title">¿Qué pantallas componen la app?</h3>
+        <p class="feature-text">
+          Un asistente inicial de configuración y <strong>4 pestañas principales</strong>: <em>Inicio</em> (resumen general y balance), <em>Actividad</em> (historial de compras), <em>Presupuesto</em> (control por categorías) y <em>Hogar</em> (ajustes y miembros).
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">3</div>
+        <h3 class="feature-title">¿Cómo viaja la información?</h3>
+        <p class="feature-text">
+          Al registrar un gasto, el sistema divide el valor automáticamente, recalcula los saldos de cada persona en tiempo real, descuenta el monto del presupuesto mensual y permite saldar la deuda en una sola transacción limpia.
+        </p>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 1: MAPA DE PANTALLAS Y COMPONENTES (INTERACTIVO) -->
+    <div class="card card-frost">
+      <div class="section-title-box">
+        <div>
+          <div class="section-tag">Arquitectura Visual</div>
+          <h2 class="section-heading">Mapa de Pantallas y Partes de la App</h2>
+          <p class="section-desc">
+            Haz clic en cualquier pantalla o ventana emergente para ver en detalle qué hace, qué información muestra y qué acciones permite el usuario.
+          </p>
+        </div>
+      </div>
+
+      <!-- Filtros / Pestañas de categorías -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+        <button class="btn-pill btn-secondary" onclick="filterScreens('all')" id="btn-filter-all">Todas las partes</button>
+        <button class="btn-pill btn-secondary" onclick="filterScreens('tab')" id="btn-filter-tab">4 Pestañas Principales</button>
+        <button class="btn-pill btn-secondary" onclick="filterScreens('modal')" id="btn-filter-modal">7 Ventanas / Modales</button>
+        <button class="btn-pill btn-secondary" onclick="filterScreens('auth')" id="btn-filter-auth">Entrada y Configuración</button>
+      </div>
+
+      <!-- Cuadrícula de pantallas -->
+      <div class="screens-grid" id="screensGrid">
+        <!-- Generado dinámicamente por JS con fallback -->
+      </div>
+
+      <!-- Detalle Interactivo de la pantalla seleccionada -->
+      <div class="screen-detail-box" id="screenDetailBox">
+        <div class="screen-detail-header">
+          <div>
+            <span class="screen-badge badge-tab" id="detailBadge">Pestaña Principal</span>
+            <h3 style="font-size: 20px; font-weight: 800; color: var(--midnight);" id="detailTitle">Inicio (Dashboard)</h3>
+          </div>
+          <span style="font-size: 13px; color: var(--slate);" id="detailSubtitle">Punto de partida del usuario</span>
+        </div>
+
+        <p style="font-size: 14px; color: var(--midnight);" id="detailDescription">
+          Es el centro de control principal. Muestra de un vistazo la foto del hogar, el saldo acumulado (si te deben dinero o tú debes), los accesos directos más frecuentes y los últimos gastos registrados.
+        </p>
+
+        <div class="detail-grid">
+          <div class="detail-column">
+            <div class="detail-col-title">¿Qué información muestra?</div>
+            <ul class="detail-col-list" id="detailShows">
+              <li>Balance general ("Te deben $X" o "Debes $Y")</li>
+              <li>Resumen de saldos de cada integrante</li>
+              <li>Lista de los últimos 5 gastos con su estado</li>
+            </ul>
+          </div>
+
+          <div class="detail-column">
+            <div class="detail-col-title">¿Qué acciones permite hacer?</div>
+            <ul class="detail-col-list" id="detailActions">
+              <li>Botón rápido para "Registrar gasto"</li>
+              <li>Botón para "Liquidar cuentas" y saldar deudas</li>
+              <li>Cambiar la foto de portada del hogar</li>
+            </ul>
+          </div>
+
+          <div class="detail-column">
+            <div class="detail-col-title">¿Con qué pantallas se conecta?</div>
+            <ul class="detail-col-list" id="detailConnects">
+              <li>Abre modal "Registrar Gasto"</li>
+              <li>Abre modal "Liquidar Cuentas"</li>
+              <li>Lleva a la pestaña "Actividad" al ver todo</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: DIAGRAMA DE FLUJO DE LA EXPERIENCIA (USER JOURNEY) -->
+    <div class="card">
+      <div class="section-title-box">
+        <div>
+          <div class="section-tag">Flujo de Navegación</div>
+          <h2 class="section-heading">¿Cómo fluye la experiencia paso a paso?</h2>
+          <p class="section-desc">
+            El recorrido que realiza una persona desde que crea su hogar hasta que liquida las cuentas del mes.
+          </p>
+        </div>
+      </div>
+
+      <div class="flow-steps-container">
+
+        <!-- PASO 1 -->
+        <div class="flow-step-card">
+          <div class="step-number-circle">
+            1
+            <span class="step-number-sub">Fase</span>
+          </div>
+          <div>
+            <div class="step-body-title">
+              Entrada y Creación del Hogar
+              <span class="step-pill">Asistente de 4 Pasos</span>
+            </div>
+            <p class="step-body-desc">
+              El usuario que crea el hogar define el nombre de la casa (ej: "Apartamento 302"), la moneda oficial, invita a su pareja o compañeros por correo, fija el presupuesto mensual y tiene la opción de anotar el primer gasto.
+            </p>
+            <div class="step-actions-row">
+              <span class="step-action-tag">👋 Pantalla de Bienvenida</span>
+              <span class="step-action-tag">🏠 Asistente Onboarding</span>
+              <span class="step-action-tag">✉️ Invitación a integrantes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-connector">↓</div>
+
+        <!-- PASO 2 -->
+        <div class="flow-step-card">
+          <div class="step-number-circle">
+            2
+            <span class="step-number-sub">Fase</span>
+          </div>
+          <div>
+            <div class="step-body-title">
+              El Día a Día: Registro de Compras
+              <span class="step-pill">Modal de Registro Rápido</span>
+            </div>
+            <p class="step-body-desc">
+              Cuando alguien hace una compra (ej. Mateo paga $480.000 en el mercado), abre la app y registra el concepto. Elige la categoría (Fijos, Recurrentes, Ocasionales o Imprevistos) y la app reparte el 50/50 o en porcentajes acordados.
+            </p>
+            <div class="step-actions-row">
+              <span class="step-action-tag">➕ Botón "Registrar gasto"</span>
+              <span class="step-action-tag">🏷️ Asignar categoría</span>
+              <span class="step-action-tag">⚖️ División automática</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-connector">↓</div>
+
+        <!-- PASO 3 -->
+        <div class="flow-step-card">
+          <div class="step-number-circle">
+            3
+            <span class="step-number-sub">Fase</span>
+          </div>
+          <div>
+            <div class="step-body-title">
+              Monitoreo y Control del Presupuesto
+              <span class="step-pill">Pestañas de Actividad & Presupuesto</span>
+            </div>
+            <p class="step-body-desc">
+              La app calcula en tiempo real cuánto presupuesto queda disponible en cada categoría y muestra barras visuales de progreso. Si se superan los límites fijados, se muestra una alerta visual en rojo.
+            </p>
+            <div class="step-actions-row">
+              <span class="step-action-tag">📊 Pestaña Presupuesto</span>
+              <span class="step-action-tag">🔍 Filtros en Historial de Actividad</span>
+              <span class="step-action-tag">⚠️ Alertas de sobrecosto</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-connector">↓</div>
+
+        <!-- PASO 4 -->
+        <div class="flow-step-card">
+          <div class="step-number-circle">
+            4
+            <span class="step-number-sub">Fase</span>
+          </div>
+          <div>
+            <div class="step-body-title">
+              Cierre del Período y Liquidación
+              <span class="step-pill">Modal Liquidar Cuentas</span>
+            </div>
+            <p class="step-body-desc">
+              Al final del mes o quincena, no hace falta hacer transferencias cruzadas. KOPAR calcula la diferencia neta: Mateo le transfiere el valor exacto a Natalia, se presiona "Marcar como saldado" y todos los gastos pendientes quedan en $0.
+            </p>
+            <div class="step-actions-row">
+              <span class="step-action-tag">🤝 Botón "Liquidar cuentas"</span>
+              <span class="step-action-tag">💳 Resumen de transferencia</span>
+              <span class="step-action-tag">✨ Balance en ceros</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECCIÓN 3: MAPA DE RELACIÓN DE DATOS (CÓMO CONECTA LA INFORMACIÓN) -->
+    <div class="card card-frost">
+      <div class="section-title-box">
+        <div>
+          <div class="section-tag">Flujo de Datos</div>
+          <h2 class="section-heading">Mapa de Dependencias e Impacto en Cascada</h2>
+          <p class="section-desc">
+            Así es como una sola acción (como ingresar una compra) actualiza instantáneamente todas las partes de la aplicación.
+          </p>
+        </div>
+      </div>
+
+      <div class="data-flow-svg-container">
+        <!-- SVG limpio y 100% responsivo sin librerías externas -->
+        <svg class="data-flow-diagram" viewBox="0 0 880 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Fondos de Cajas / Nodos -->
+          <!-- Nodo Central: Nuevo Gasto -->
+          <rect x="330" y="30" width="220" height="70" rx="16" fill="#0052ff" stroke="#0045d8" stroke-width="2"/>
+          <text x="440" y="60" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="14" font-family="sans-serif">1. Registro de Gasto</text>
+          <text x="440" y="80" text-anchor="middle" fill="#eef4ff" font-size="11" font-family="sans-serif">(Monto, Quién pagó, Categoría)</text>
+
+          <!-- Flechas salientes -->
+          <!-- Hacia la Izquierda: Balance y Saldos -->
+          <path d="M330 65 L180 65 L180 160" stroke="#0052ff" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+          
+          <!-- Hacia el Centro: Historial de Actividad -->
+          <path d="M440 100 L440 160" stroke="#0052ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Hacia la Derecha: Presupuesto por Categoría -->
+          <path d="M550 65 L700 65 L700 160" stroke="#0052ff" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+
+          <!-- Flechas secundarias hacia Liquidación -->
+          <path d="M180 230 L180 280 L330 280" stroke="#27ad75" stroke-width="2" marker-end="url(#arrow)"/>
+          <path d="M440 230 L440 250 L440 280" stroke="#dedfe2" stroke-width="2"/>
+
+          <!-- Nodo Izquierda: Balance General -->
+          <rect x="70" y="160" width="220" height="70" rx="14" fill="#ffffff" stroke="#dedfe2" stroke-width="1.5"/>
+          <text x="180" y="190" text-anchor="middle" fill="#0a0b0d" font-weight="bold" font-size="13" font-family="sans-serif">2. Balance y Quién Debe</text>
+          <text x="180" y="210" text-anchor="middle" fill="#5b616e" font-size="11" font-family="sans-serif">Calcula "Te deben" vs "Debes"</text>
+
+          <!-- Nodo Centro: Historial de Actividad -->
+          <rect x="330" y="160" width="220" height="70" rx="14" fill="#ffffff" stroke="#dedfe2" stroke-width="1.5"/>
+          <text x="440" y="190" text-anchor="middle" fill="#0a0b0d" font-weight="bold" font-size="13" font-family="sans-serif">3. Historial de Actividad</text>
+          <text x="440" y="210" text-anchor="middle" fill="#5b616e" font-size="11" font-family="sans-serif">Filtros por mes, estado y persona</text>
+
+          <!-- Nodo Derecha: Progreso de Presupuesto -->
+          <rect x="590" y="160" width="220" height="70" rx="14" fill="#ffffff" stroke="#dedfe2" stroke-width="1.5"/>
+          <text x="700" y="190" text-anchor="middle" fill="#0a0b0d" font-weight="bold" font-size="13" font-family="sans-serif">4. Presupuesto Mensual</text>
+          <text x="700" y="210" text-anchor="middle" fill="#5b616e" font-size="11" font-family="sans-serif">Aumenta gasto de la categoría</text>
+
+          <!-- Nodo Inferior: Liquidación y Cierre -->
+          <rect x="330" y="250" width="220" height="60" rx="14" fill="#27ad75" stroke="#1f8b5d" stroke-width="1.5"/>
+          <text x="440" y="278" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="13" font-family="sans-serif">5. Liquidación Final</text>
+          <text x="440" y="296" text-anchor="middle" fill="#eafaf1" font-size="11" font-family="sans-serif">Saldar deudas y reiniciar balances</text>
+
+          <!-- Definición de puntas de flecha -->
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 8 5 L 0 9 z" fill="#0052ff"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
+      <div style="margin-top: 18px; font-size: 13px; color: var(--slate); line-height: 1.5;">
+        💡 <strong>Principio de reactividad:</strong> No existen pasos manuales intermedios. Cada vez que se añade, edita o elimina un gasto, el Balance General, el Presupuesto y el Historial se sincronizan al mismo tiempo.
+      </div>
+    </div>
+
+    <!-- SECCIÓN 4: GLOSARIO DE CONCEPTOS CLAVE -->
+    <div class="card">
+      <div class="section-title-box">
+        <div>
+          <div class="section-tag">Conceptos Clave</div>
+          <h2 class="section-heading">Las 4 Reglas de Oro de KOPAR</h2>
+          <p class="section-desc">
+            Términos y lógicas de diseño explicadas de forma sencilla para comprender la experiencia.
+          </p>
+        </div>
+      </div>
+
+      <div class="glossary-grid">
+        <div class="glossary-card">
+          <div class="glossary-card-header">
+            <div class="glossary-indicator" style="background-color: var(--blue-primary);"></div>
+            <h4 class="glossary-term">Gastos Fijos</h4>
+          </div>
+          <p class="glossary-def">
+            Gastos que se repiten todos los meses y son indispensables para vivir: Arriendo, servicios públicos, mercado y administración.
+          </p>
+        </div>
+
+        <div class="glossary-card">
+          <div class="glossary-card-header">
+            <div class="glossary-indicator" style="background-color: var(--purple-accent);"></div>
+            <h4 class="glossary-term">Gastos Recurrentes</h4>
+          </div>
+          <p class="glossary-def">
+            Suscripciones y pagos que se repiten con frecuencia pero que son prescindibles: Streaming (Netflix/Spotify), gimnasio y paseador de mascotas.
+          </p>
+        </div>
+
+        <div class="glossary-card">
+          <div class="glossary-card-header">
+            <div class="glossary-indicator" style="background-color: var(--amber-accent);"></div>
+            <h4 class="glossary-term">Gastos Ocasionales</h4>
+          </div>
+          <p class="glossary-def">
+            Gastos planeados que ocurren de vez en cuando: Salidas a restaurantes, viajes, celebraciones familiares y ropa.
+          </p>
+        </div>
+
+        <div class="glossary-card">
+          <div class="glossary-card-header">
+            <div class="glossary-indicator" style="background-color: var(--red-negative);"></div>
+            <h4 class="glossary-term">Gastos Imprevistos</h4>
+          </div>
+          <p class="glossary-def">
+            Emergencias no planeadas pero de obligatoria atención: Reparación de una fuga de agua, consulta médica de urgencia o veterinario.
+          </p>
+        </div>
+      </div>
+
+      <div class="glossary-grid" style="margin-top: 16px;">
+        <div class="glossary-card">
+          <div class="glossary-card-header">
+            <div class="glossary-indicator" style="background-color: var(--green-positive);"></div>
+            <h4 class="glossary-term">Balance Neto</h4>
+          </div>
+          <p class="glossary-def">
+            En lugar de pagar cada recibo por separado, la app calcula quién pagó más en total durante el período para que solo se realice una única transferencia compensatoria.
+          </p>
+        </div>
+
+        <div class="glossary-card">
+          <div class="glossary-card-header">
+            <div class="glossary-indicator" style="background-color: var(--midnight);"></div>
+            <h4 class="glossary-term">Regla de 1 Administrador</h4>
+          </div>
+          <p class="glossary-def">
+            Para evitar confusiones en la configuración del hogar, solo existe un usuario con rol de Administrador. Este rol se puede transferir a cualquier otro miembro en cualquier momento.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="container" style="padding: 0 24px;">
+      <p><strong>KOPAR — Finanzas Compartidas del Hogar</strong></p>
+      <p style="margin-top: 4px; color: var(--ash);">Guía visual generada como referencia de aprendizaje sobre arquitectura de información y UX.</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPT PARA INTERACTIVIDAD DE LA GUÍA (Sin librerías externas) -->
+  <script>
+    // Base de datos de pantallas para el explorador interactivo
+    const screensData = [
+      {
+        id: 'inicio',
+        name: 'Inicio (Dashboard)',
+        type: 'tab',
+        badgeText: 'Pestaña 1',
+        badgeClass: 'badge-tab',
+        summary: 'Resumen financiero, foto del hogar y balance neto.',
+        description: 'Es la pantalla principal que recibe al usuario autenticado. Ofrece una vista limpia y sin distracciones sobre el estado financiero actual del hogar.',
+        shows: [
+          'Balance neto ("Te deben $X" o "Debes $Y")',
+          'Foto de portada personalizable del hogar',
+          'Resumen de cuánto ha aportado cada persona',
+          'Últimas 5 actividades y compras registradas'
+        ],
+        actions: [
+          'Botón de acción rápida: "Registrar gasto"',
+          'Botón para "Liquidar cuentas"',
+          'Cambiar de usuario activo desde el encabezado',
+          'Cambiar la imagen de portada de la casa'
+        ],
+        connects: [
+          'Abre el modal de Registrar Gasto',
+          'Abre el modal de Liquidar Cuentas',
+          'Lleva a la pestaña de Actividad con "Ver todo"'
+        ]
+      },
+      {
+        id: 'actividad',
+        name: 'Actividad (Historial)',
+        type: 'tab',
+        badgeText: 'Pestaña 2',
+        badgeClass: 'badge-tab',
+        summary: 'Historial completo de gastos con filtros y búsqueda.',
+        description: 'Permite consultar cada compra realizada en el hogar. Organiza los gastos mes a mes y cuenta con filtros por persona, categoría y estado de pago.',
+        shows: [
+          'Lista cronológica de gastos agrupados por mes',
+          'Indicadores de estado: PAGADO, PENDIENTE o DEBES',
+          'Buscador por nombre de gasto o comercio',
+          'Filtros por categoría (Fijos, Recurrentes, etc.)'
+        ],
+        actions: [
+          'Buscar gastos por palabra clave',
+          'Filtrar por quién pagó o si está pendiente',
+          'Hacer clic en un gasto para ver el recibo o editarlo',
+          'Registrar un nuevo gasto desde el botón flotante'
+        ],
+        connects: [
+          'Abre el modal de Detalle del Gasto',
+          'Abre el modal de Registrar Gasto'
+        ]
+      },
+      {
+        id: 'presupuesto',
+        name: 'Presupuesto',
+        type: 'tab',
+        badgeText: 'Pestaña 3',
+        badgeClass: 'badge-tab',
+        summary: 'Control de límites mensuales por las 4 categorías.',
+        description: 'Muestra el progreso del gasto mensual frente al presupuesto establecido. Advierte si algún rubro está cerca de agotarse o si ya se sobrepasó.',
+        shows: [
+          'Barra de progreso del presupuesto total del hogar',
+          'Desglose por las 4 categorías oficiales',
+          'Porcentaje consumido y dinero restante en cada categoría',
+          'Alertas visuales en rojo para gastos excedidos'
+        ],
+        actions: [
+          'Ajustar los límites de dinero de cada categoría',
+          'Consultar la definición y subcategorías de cada rubro'
+        ],
+        connects: [
+          'Abre el modal de Edición de Presupuestos'
+        ]
+      },
+      {
+        id: 'hogar',
+        name: 'Hogar (Ajustes)',
+        type: 'tab',
+        badgeText: 'Pestaña 4',
+        badgeClass: 'badge-tab',
+        summary: 'Integrantes, reglas de división y configuración.',
+        description: 'Es el panel de administración del hogar. Permite gestionar quién vive en la casa, invitar nuevas personas, definir la moneda y configurar la regla de reparto predeterminada.',
+        shows: [
+          'Lista de integrantes con su foto, correo y rol',
+          'Código de invitación para unirse al hogar',
+          'Regla de división por defecto (50/50 o personalizada)',
+          'Moneda del hogar ($ COP, USD, EUR, etc.)'
+        ],
+        actions: [
+          'Invitar a una nueva persona por correo o enlace',
+          'Transferir el rol de Administrador a otro miembro',
+          'Eliminar a un integrante (si no es el único admin)',
+          'Reiniciar datos de prueba o cerrar sesión'
+        ],
+        connects: [
+          'Abre el modal de Invitar Persona',
+          'Regresa a la Bienvenida al cerrar sesión'
+        ]
+      },
+      {
+        id: 'modal_add',
+        name: 'Modal: Registrar Gasto',
+        type: 'modal',
+        badgeText: 'Ventana Emergente',
+        badgeClass: 'badge-modal',
+        summary: 'Formulario rápido para ingresar una nueva compra.',
+        description: 'Ventana que se despliega para registrar un gasto. Solo pide los datos indispensables para que el proceso tome menos de 10 segundos.',
+        shows: [
+          'Campo para monto con prefijo de moneda automático',
+          'Selector de categoría y subcategoría',
+          'Selector de quién pagó la cuenta',
+          'Selector de método de división (50/50, 100% uno, etc.)'
+        ],
+        actions: [
+          'Escribir concepto y monto',
+          'Adjuntar nota o foto de factura (opcional)',
+          'Guardar y actualizar todos los saldos al instante'
+        ],
+        connects: [
+          'Actualiza Inicio, Actividad y Presupuesto simultáneamente'
+        ]
+      },
+      {
+        id: 'modal_settle',
+        name: 'Modal: Liquidar Cuentas',
+        type: 'modal',
+        badgeText: 'Ventana Emergente',
+        badgeClass: 'badge-modal',
+        summary: 'Cálculo de compensación para saldar las deudas.',
+        description: 'Resuelve el momento más incómodo de compartir casa: las transferencias. Muestra con total claridad quién le transfiere cuánto a quién para quedar en ceros.',
+        shows: [
+          'Resumen de transferencias sugeridas',
+          'Monto exacto a transferir entre personas',
+          'Lista de gastos pendientes que se van a marcar como pagados'
+        ],
+        actions: [
+          'Presionar "Marcar como saldado"',
+          'Añadir una nota de comprobante de la transferencia'
+        ],
+        connects: [
+          'Cambia el estado de los gastos a PAGADO y reinicia el balance a $0'
+        ]
+      },
+      {
+        id: 'modal_detail',
+        name: 'Modal: Detalle del Gasto',
+        type: 'modal',
+        badgeText: 'Ventana Emergente',
+        badgeClass: 'badge-modal',
+        summary: 'Ficha completa de una compra con opción de editar.',
+        description: 'Muestra la factura, la fecha exacta, quién pagó, cómo se repartió el dinero entre cada integrante y permite corregir errores.',
+        shows: [
+          'Detalle de la división por persona (monto y porcentaje)',
+          'Fecha, hora y notas adicionales',
+          'Estado actual del gasto'
+        ],
+        actions: [
+          'Editar la información del gasto',
+          'Eliminar el gasto'
+        ],
+        connects: [
+          'Reabre el modal de edición o elimina el registro de la app'
+        ]
+      },
+      {
+        id: 'onboarding',
+        name: 'Asistente de Onboarding',
+        type: 'auth',
+        badgeText: 'Flujo Inicial',
+        badgeClass: 'badge-auth',
+        summary: 'Proceso guiado de 4 pasos para configurar un nuevo hogar.',
+        description: 'Acompaña al usuario paso a paso sin saturarlo: 1) Nombre y moneda, 2) Perfil e invitados, 3) Presupuesto estimado y 4) Primer gasto opcional.',
+        shows: [
+          'Indicador visual de progreso en 4 pasos',
+          'Formulario amigable sin términos financieros confusos',
+          'Distribución porcentual sugerida para el presupuesto'
+        ],
+        actions: [
+          'Escribir el nombre del hogar y elegir divisa',
+          'Escribir los correos de los compañeros de casa',
+          'Definir el presupuesto total y finalizar la configuración'
+        ],
+        connects: [
+          'Da paso directo al Inicio de la aplicación con todo listo'
+        ]
+      }
+    ];
+
+    let currentFilter = 'all';
+    let selectedScreenId = 'inicio';
+
+    function renderScreensGrid() {
+      const grid = document.getElementById('screensGrid');
+      grid.innerHTML = '';
+
+      const filtered = screensData.filter(s => currentFilter === 'all' || s.type === currentFilter);
+
+      filtered.forEach(screen => {
+        const div = document.createElement('div');
+        div.className = `screen-item ${screen.id === selectedScreenId ? 'active' : ''}`;
+        div.onclick = () => selectScreen(screen.id);
+
+        div.innerHTML = `
+          <span class="screen-badge ${screen.badgeClass}">${screen.badgeText}</span>
+          <div class="screen-name">${screen.name}</div>
+          <div class="screen-summary">${screen.summary}</div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function selectScreen(screenId) {
+      selectedScreenId = screenId;
+      const screen = screensData.find(s => s.id === screenId);
+      if (!screen) return;
+
+      document.getElementById('detailBadge').className = `screen-badge ${screen.badgeClass}`;
+      document.getElementById('detailBadge').textContent = screen.badgeText;
+      document.getElementById('detailTitle').textContent = screen.name;
+      document.getElementById('detailSubtitle').textContent = screen.summary;
+      document.getElementById('detailDescription').textContent = screen.description;
+
+      // Shows
+      const showsList = document.getElementById('detailShows');
+      showsList.innerHTML = screen.shows.map(item => `<li>${item}</li>`).join('');
+
+      // Actions
+      const actionsList = document.getElementById('detailActions');
+      actionsList.innerHTML = screen.actions.map(item => `<li>${item}</li>`).join('');
+
+      // Connects
+      const connectsList = document.getElementById('detailConnects');
+      connectsList.innerHTML = screen.connects.map(item => `<li>${item}</li>`).join('');
+
+      renderScreensGrid();
+    }
+
+    function filterScreens(type) {
+      currentFilter = type;
+      
+      // Update buttons style
+      ['all', 'tab', 'modal', 'auth'].forEach(t => {
+        const btn = document.getElementById(`btn-filter-${t}`);
+        if (btn) {
+          if (t === type) {
+            btn.className = 'btn-pill btn-primary';
+          } else {
+            btn.className = 'btn-pill btn-secondary';
+          }
+        }
+      });
+
+      renderScreensGrid();
+    }
+
+    // Inicializar al cargar
+    document.addEventListener('DOMContentLoaded', () => {
+      filterScreens('all');
+      selectScreen('inicio');
+    });
+  </script>
+</body>
+</html>

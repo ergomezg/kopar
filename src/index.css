@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-coinbase-blue: #0052ff;
+    --color-interactive-blue: #578bfa;
+    --color-pure-white: #ffffff;
+    --color-midnight: #0a0b0d;
+    --color-slate: #5b616e;
+    --color-ash: #8a919e;
+    --color-frost: #f7f8f9;
+    --color-cloud: #eef0f3;
+    --color-pewter: #dedfe2;
+    --color-charcoal: #141519;
+    --color-positive-green: #27ad75;
+    --color-negative-red: #f0616d;
+
+    --font-coinbasedisplay: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-coinbasesans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-coinbasetext: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  body {
+    background-color: var(--color-pure-white);
+    color: var(--color-midnight);
+    font-family: var(--font-coinbasesans);
+    -webkit-tap-highlight-color: transparent;
+    letter-spacing: -0.01em;
+  }
+
+  h1, h2, h3, .font-serif, .font-display {
+    font-family: var(--font-coinbasedisplay);
+  }
+}
+
+/* Custom scrollbar matching Coinbase styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f7f8f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #dedfe2;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8a919e;
+}
+
+
+

@@ -1,0 +1,6 @@
+{
+  "name": "KOPAR",
+  "description": "Plataforma de finanzas compartidas y gestión de gastos del hogar para parejas y roomies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
