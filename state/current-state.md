@@ -1,7 +1,7 @@
 # Estado Actual del Proyecto KOPAR
 
-- **Última actualización:** 2026-08-26
-- **Versión:** 0.1.0-alpha
+- **Última actualización:** 2026-08-30
+- **Versión:** 0.2.0-beta (Zero-AI Architecture)
 - **Stack:** React 19, TypeScript ~5.8, Tailwind CSS v4 (`@tailwindcss/vite`), Vite 6, Motion (`motion/react`), Lucide React, Recharts.
 
 ---
@@ -16,13 +16,17 @@
 | **Recent Activity** | `src/components/RecentActivity.tsx` | Estable | Feed de últimos movimientos con badges de estado y formato relativo de fechas. |
 | **Bottom Navigation** | `src/components/BottomNavigation.tsx` | Estable | Barra de navegación inferior móvil/desktop para las 4 pestañas. |
 | **Tab Actividad** | `src/components/tabs/ActividadTab.tsx` | Estable | Listado completo de transacciones con búsqueda, filtros por categoría y estado. |
-| **Tab Presupuesto** | `src/components/tabs/PresupuestoTab.tsx` | Estable | Gráfico de distribución de gastos vs límites por categoría con `Recharts`. |
+| **Tab Presupuesto** | `src/components/tabs/PresupuestoTab.tsx` | Estable | Gráficos con Recharts, límites por categoría y diagnóstico financiero determinista (`budgetInsights.ts`). |
 | **Tab Hogar** | `src/components/tabs/HogarTab.tsx` | Estable | Miembros del hogar, roles (1 admin), ingresos registrados y liquidaciones. |
 | **Onboarding Wizard** | `src/components/auth/OnboardingWizard.tsx` | Estable | Flujo de 4 pasos para configurar hogar, divisa, integrantes, presupuesto y primer gasto. |
 | **Auth & Welcome** | `src/components/auth/` | Estable | Login, registro y bienvenida inicial con persistencia de sesión. |
-| **Modales de Acción** | `src/components/modals/` | Estable | `AddExpenseModal`, `SettleModal`, `EditBudgetModal`, `ExpenseDetailModal`, `InviteModal`, `CustomCoverModal`, `HelpModal`. |
+| **AddExpenseModal** | `src/components/modals/AddExpenseModal.tsx` | Estable | Autocategorización determinista (`categoryMatcher.ts`), detección de duplicados (`duplicateDetector.ts`) y parser de recibos (`receiptParser.ts`). |
+| **SettleModal** | `src/components/modals/SettleModal.tsx` | Estable | Liquidación con algoritmo Min-Cash-Flow (`debtSimplifier.ts`) para minimizar transacciones. |
 | **Design System Tokens** | `src/constants/theme.ts` & `design.md` | Estable | Tokens de colores, radios y fuentes centralizados. |
-| **Utilidades de Formato** | `src/utils/format.ts` | Estable | `formatAmount`, `formatDateDDMMAAAA`, `formatRelativeDate`, `formatDisplayName`. |
+| **Motores Deterministas (Zero-AI)** | `src/utils/` | Estable | `categoryMatcher.ts`, `debtSimplifier.ts`, `receiptParser.ts`, `budgetInsights.ts`, `duplicateDetector.ts`. |
+| **Cliente de Supabase (Fase 1)** | `src/lib/supabase.ts` | Estable | Cliente oficial conectado a Supabase para DB, Auth y Storage. |
+| **Servicio TRM (Fase 1)** | `src/services/trm.ts` | Estable | Fetch a SODA API (datos.gov.co) con caché local de 24 horas. |
+| **Esquema DB (Fase 1)** | `supabase/schema.sql` | Estable | Script DDL con tablas, constraints y políticas RLS para Supabase. |
 
 ---
 

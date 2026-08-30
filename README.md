@@ -6,7 +6,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![Google Gemini](https://img.shields.io/badge/Google_Gemini-API-4285F4?style=for-the-badge&logo=google&logoColor=white)
+![Zero AI](https://img.shields.io/badge/Architecture-Zero--AI%20Deterministic-27AD75?style=for-the-badge&logo=fastapi&logoColor=white)
 
 <p align="center">
   <strong>Gestión transparente, colaborativa y equitativa de gastos del hogar, presupuestos por categorías y liquidación de saldos entre convivientes.</strong>
@@ -43,8 +43,9 @@
 
 - **Visibilidad en tiempo real:** Sabes exactamente cuánto debes, cuánto te deben y el balance neto consolidado.
 - **División inteligente y justa:** Opciones de repartición equitativa (50/50 o entre partes iguales) o proporcional a los ingresos reales de cada conviviente.
-- **Presupuestos y límites mensuales:** Monitoreo visual de gastos categorizados con alertas de sobrecosto.
-- **Liquidación sin estrés:** Registro claro de transferencias y saldos finiquitados para mantener la paz en el hogar.
+- **Presupuestos y límites mensuales:** Monitoreo visual de gastos categorizados con alertas deterministas de sobrecosto.
+- **Liquidación sin estrés:** Algoritmo *Min-Cash-Flow* para minimizar el número de transferencias entre integrantes.
+- **Arquitectura Zero-AI Offline:** 100% lógica determinista con baja latencia (<1ms), cero alucinaciones y cero costos de inferencia.
 
 ---
 
@@ -52,21 +53,21 @@
 
 ### 📊 Gestión de Balances y Gastos
 - **Balance Card Dinámico:** Muestra el desglose de "Debes", "Te deben" y el saldo neto, con portada personalizable para el hogar.
-- **Registro Rápido de Gastos:** Agrega compras con título, monto, categoría, subcategoría, pagador, comprobante/recibo y notas.
-- **División Flexible:** Soporta división equitativa (*50/50*, *1/N*) o proporcional según ingresos reportados.
+- **Registro Rápido de Gastos con Autocategorización:** Agrega compras con reconocimiento instantáneo de categorías por palabras clave y comercios frecuentes.
+- **Detector Heurístico de Duplicados:** Alertas reactivas para evitar registrar dos veces el mismo gasto.
+- **Parser de Comprobantes Bancarios:** Extracción automática de montos, fechas y conceptos de notificaciones de Bancolombia, Nequi, Daviplata y PSE.
+- **División Flexible:** Soporta división equitativa (*50/50*, *1/N*) o porcentaje personalizado.
 - **Feed de Actividad:** Historial de transacciones con búsqueda en tiempo real, filtros por categoría y badges de estado.
 
 ### 🎯 Presupuestos y Categorías
 - **Gráficos Interactivos:** Visualización con Recharts de gastos actuales vs. topes presupuestarios por categoría.
+- **Diagnóstico y Alertas Financieras:** Reglas deterministas de advertencia al alcanzar el 80% y 100% del límite de cada categoría.
 - **Personalización:** Creación y ajuste de límites presupuestarios y categorías del hogar.
 
 ### 🤝 Gestión de Hogar y Liquidaciones
 - **Perfiles y Roles:** 1 Administrador por hogar con miembros activos y pendientes de invitación mediante código único.
-- **Módulo de Liquidación (Settle Up):** Cálculo automático de deudas cruzadas con registro de recibos de pago.
+- **Módulo de Liquidación (Min-Cash-Flow):** Algoritmo de minimización de transacciones para saldar todas las deudas en el menor número de pagos posibles.
 - **Onboarding Wizard:** Flujo guiado de 4 pasos para configurar un nuevo hogar, moneda, integrantes, presupuesto y primer gasto.
-
-### 🤖 Asistencia Inteligente con Gemini AI
-- Integración con `@google/genai` para categorización inteligente, análisis de recibos y recomendaciones de ahorro para el hogar.
 
 ---
 
@@ -80,7 +81,7 @@
 | **Animaciones** | [Motion](https://motion.dev/) (`motion/react`) | Transiciones fluidas y micro-interacciones. |
 | **Iconografía** | [Lucide React](https://lucide.dev/) | Iconos SVG ligeros, limpios y consistentes. |
 | **Gráficos & Métricas** | [Recharts 3](https://recharts.org/) | Gráficos de barras y distribución de presupuestos. |
-| **Inteligencia Artificial** | [@google/genai](https://www.npmjs.com/package/@google/genai) | SDK oficial para modelos Google Gemini. |
+| **Lógica Financiera** | *Zero-AI Local Engines* | Algoritmos Min-Cash-Flow, Trie/Keyword Matcher y Regex Parsers. |
 
 ---
 
@@ -109,7 +110,7 @@ kopar/
 │   │   ├── QuickActions.tsx   # Acciones rápidas (Gasto, Liquidar, Invitar)
 │   │   └── RecentActivity.tsx # Feed de últimos movimientos
 │   ├── constants/         # Tokens de tema y valores estáticos
-│   ├── utils/             # Utilidades (formato de moneda es-CO, fechas, nombres)
+│   ├── utils/             # Utilidades (formato de moneda es-CO, Min-Cash-Flow, CategoryMatcher, ReceiptParser, BudgetInsights, DuplicateDetector)
 │   ├── data.ts            # Datos iniciales y mocks tipados
 │   ├── types.ts           # Definición de interfaces y tipos TypeScript
 │   ├── App.tsx            # Componente raíz y control de estado
@@ -141,13 +142,7 @@ kopar/
    npm install
    ```
 
-3. **Configurar variables de entorno:**
-   Copia el archivo de ejemplo `.env.example` a `.env.local` y define tu API Key de Gemini:
-   ```bash
-   cp .env.example .env.local
-   ```
-
-4. **Iniciar el servidor de desarrollo:**
+3. **Iniciar el servidor de desarrollo:**
    ```bash
    npm run dev
    ```
@@ -157,11 +152,10 @@ kopar/
 
 ## 🔑 Variables de Entorno
 
-Crea un archivo `.env.local` en la raíz del proyecto con los siguientes parámetros:
+Copia el archivo `.env.example` a `.env.local` si deseas personalizar la URL de la aplicación:
 
 | Variable | Requerida | Descripción |
 |---|---|---|
-| `GEMINI_API_KEY` | Opcional | Clave de API de Google Gemini para funciones inteligentes (análisis de gastos, categorización). |
 | `APP_URL` | Opcional | URL base de la aplicación (usado en despliegues en producción o callbacks). |
 
 ---
@@ -170,38 +164,34 @@ Crea un archivo `.env.local` en la raíz del proyecto con los siguientes paráme
 
 En el directorio del proyecto puedes ejecutar:
 
-- `npm run dev`: Inicia el servidor de desarrollo con Hot Module Replacement en el puerto 3000.
+- `npm run dev`: Inicia el servidor de desarrollo con Vite en `http://localhost:3000`.
 - `npm run build`: Compila la aplicación para producción en la carpeta `dist/`.
-- `npm run preview`: Previsualiza localmente la compilación de producción.
+- `npm run preview`: Previsualiza localmente el *build* de producción.
 - `npm run lint`: Ejecuta el verificador de tipos de TypeScript (`tsc --noEmit`).
-- `npm run clean`: Limpia artefactos generados de compilación (`dist`).
 
 ---
 
 ## 🎨 Principios de Diseño y UX
 
-El diseño de KOPAR sigue una estética minimalista, inspirada en plataformas como Coinbase y Stripe:
-
-1. **Elevación sin Sombras:** Cero sombras difusas (`box-shadow`). La jerarquía visual se define exclusivamente mediante bordes finos de 1px (`#dedfe2`) y contraste entre superficies (`#ffffff` frente a `#f7f8f9`).
-2. **Azul de Acción (`#0052ff`):** Reservado estrictamente para botones de acción primaria (CTA), indicador de tab activo y logo.
-3. **Forma Píldora (`rounded-full`):** Todos los botones interactivos, chips y tags usan bordes redondeados completos.
-4. **Formato Monetario Estricto:** Formato de moneda con locale colombiano (`es-CO`, ej: `$ 1.250.000 COP`) y prefijo monetario separado en formularios.
-5. **100% Light Mode:** Interfaz optimizada para máxima legibilidad y claridad bajo luz diurna.
+- **Estética Light Mode & Sin Sombras:** Todo el diseño se construye sobre fondos limpios (`#ffffff` y `#f7f8f9`), delimitado exclusivamente por bordes de 1px (`#dedfe2`).
+- **Botones en Píldora (`rounded-full`):** Todas las acciones interactivas y botones utilizan esquinas completamente redondeadas.
+- **Azul Coinbase (`#0052ff`):** Empleado con estricta jerarquía para botones de acción primaria (CTA), tabs activos y acentos clave.
+- **Formato Monetario Colombiano:** Separadores de miles con punto (`$250.000`) sin decimales superfluos.
+- **Regla de 1 Administrador:** Cada hogar posee exactamente un usuario con rol `admin`.
 
 ---
 
 ## 🧠 Sistema de Memoria y Contexto (AI Agents)
 
-Este repositorio implementa una arquitectura de memoria persistente para flujos de trabajo con asistentes de inteligencia artificial:
+Este repositorio implementa un sistema de memoria estructurada para agentes de Inteligencia Artificial:
 
-- **[`AGENTS.md`](./AGENTS.md):** Centro de control con instrucciones maestras e invariantes de desarrollo.
-- **[`contexto/`](./contexto/):** Documentación viva de reglas (`reglas.md`), diseño (`design.md`) y decisiones arquitectónicas (`decisiones.md`).
-- **[`state/`](./state/):** Registro del estado funcional actual (`current-state.md`) y backlog (`roadmap-and-pending.md`).
-- **[`decisions/`](./decisions/) & [`gotchas/`](./gotchas/):** Registro ADR y base de conocimiento de problemas resueltos.
+- [`AGENTS.md`](./AGENTS.md): Centro de control e instrucciones maestras del proyecto.
+- [`contexto/`](./contexto/): Documentos base de diseño, reglas de negocio y decisiones consolidadas.
+- [`state/`](./state/): Estado actual (`current-state.md`), backlog (`roadmap-and-pending.md`) y bloqueos (`blockers.md`).
+- [`skills/actualizar-contexto.md`](./skills/actualizar-contexto.md): Protocolo obligatorio de cierre y sincronización de memoria tras cada hito.
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto es de uso privado / educativo para el curso *AI para UXers*. Todos los derechos reservados.
-
+Este proyecto es privado y de uso educativo para el curso de AI para UXers. Todos los derechos reservados.

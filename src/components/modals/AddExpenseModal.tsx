@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { X, DollarSign, Calendar, Upload, AlertCircle, Check, Percent, Loader2, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, DollarSign, Calendar, Upload, AlertCircle, Check, Percent, Loader2, ChevronDown, ClipboardPaste, Sparkles, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Category, Expense, Member, SplitType } from '../../types';
 import { formatAmount, formatDisplayName } from '../../utils/format';
+import { matchCategoryFromTitle, MatchResult } from '../../utils/categoryMatcher';
+import { detectPotentialDuplicates, DuplicateMatch } from '../../utils/duplicateDetector';
+import { parseReceiptText, ParsedReceipt } from '../../utils/receiptParser';
 
 interface AddExpenseModalProps {
   isOpen: boolean;
@@ -14,6 +17,7 @@ interface AddExpenseModalProps {
   members: Member[];
   currentMember: Member;
   currency: string;
+  existingExpenses?: Expense[];
 }
 
 export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
@@ -26,6 +30,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   members,
   currentMember,
   currency,
+  existingExpenses = [],
 }) => {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
@@ -35,6 +40,15 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   const [receiptFileName, setReceiptFileName] = useState<string | null>(null);
   const [splitType, setSplitType] = useState<SplitType>('50_50');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Auto-categorization state
+  const [autoMatchedCategory, setAutoMatchedCategory] = useState<MatchResult | null>(null);
+  const [hasManuallySelectedCategory, setHasManuallySelectedCategory] = useState(false);
+
+  // Clipboard / Text notification parsing state
+  const [showPasteBox, setShowPasteBox] = useState(false);
+  const [pastedText, setPastedText] = useState('');
+  const [parsedNotificationSuccess, setParsedNotificationSuccess] = useState<string | null>(null);
 
   // Selected category object
   const currentCategory = categories.find((c) => c.id === categoryId) || categories[0];
@@ -60,6 +74,8 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
       setCategoryId(initialExpense.categoryId);
       setPaidById(initialExpense.paidById);
       setDate(initialExpense.date);
+      setHasManuallySelectedCategory(true);
+      setAutoMatchedCategory(null);
       if (initialExpense.splits && initialExpense.splits.length > 0) {
         const splitsMap: Record<string, number> = {};
         initialExpense.splits.forEach((s) => {
@@ -75,11 +91,32 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
       setDate(new Date().toISOString().split('T')[0]);
       setSplitType('50_50');
       setReceiptFileName(null);
+      setHasManuallySelectedCategory(false);
+      setAutoMatchedCategory(null);
+      setShowPasteBox(false);
+      setPastedText('');
+      setParsedNotificationSuccess(null);
     }
   }, [isOpen, initialExpense, categories, currentMember.id]);
 
+  // Reactive Deterministic Category Matcher on Title change
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    if (!hasManuallySelectedCategory && newTitle.trim().length >= 2) {
+      const match = matchCategoryFromTitle(newTitle);
+      if (match) {
+        setCategoryId(match.categoryId);
+        setAutoMatchedCategory(match);
+      } else {
+        setAutoMatchedCategory(null);
+      }
+    }
+  };
+
   const handleSelectCategory = (catId: string) => {
     setCategoryId(catId);
+    setHasManuallySelectedCategory(true);
+    setAutoMatchedCategory(null);
   };
 
   // Re-sync default percentages when members change
@@ -101,6 +138,52 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   }, [members]);
 
   const numAmount = parseFloat(amount) || 0;
+
+  // Real-time Duplicate Detection
+  const potentialDuplicates = useMemo(() => {
+    if (!isOpen || numAmount <= 0 || !title.trim()) return [];
+    return detectPotentialDuplicates(
+      {
+        id: initialExpense?.id,
+        title: title.trim(),
+        amount: numAmount,
+        categoryId,
+        date,
+        paidById,
+      },
+      existingExpenses
+    );
+  }, [isOpen, title, numAmount, categoryId, date, paidById, initialExpense?.id, existingExpenses]);
+
+  // Fast Deterministic Text / Notification Parser Handler
+  const handleParseNotification = (textToParse: string) => {
+    const result = parseReceiptText(textToParse);
+    if (result) {
+      if (result.amount) setAmount(result.amount.toString());
+      if (result.title) setTitle(result.title);
+      if (result.date) setDate(result.date);
+      if (result.categoryId) {
+        setCategoryId(result.categoryId);
+        setHasManuallySelectedCategory(false);
+      }
+      setParsedNotificationSuccess(`Comprobante ${result.sourceType || ''} extraído con éxito.`);
+      setShowPasteBox(false);
+      setPastedText('');
+    }
+  };
+
+  const handleClipboardPasteDirect = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const clipboardText = await navigator.clipboard.readText();
+        if (clipboardText) {
+          handleParseNotification(clipboardText);
+        }
+      }
+    } catch {
+      setShowPasteBox(true);
+    }
+  };
 
   // Compute calculated splits based on split type with exact accounting rounding compensation
   const calculateSplits = () => {
@@ -201,7 +284,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
     setTimeout(() => {
       setIsSubmitting(false);
-      // Reset fields
       setTitle('');
       setAmount('');
       setReceiptFileName(null);
@@ -233,7 +315,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               </h2>
               <button
                 onClick={onClose}
-                className="p-1 rounded-full hover:bg-[#f7f8f9] text-[#0a0b0d] transition-colors"
+                className="p-1 rounded-full hover:bg-[#f7f8f9] text-[#0a0b0d] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -241,6 +323,71 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
             {/* Modal Body */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+              {/* Notification Parser Quick Action */}
+              {!initialExpense && (
+                <div className="bg-[#f7f8f9] border border-[#dedfe2] rounded-[16px] p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0a0b0d]">
+                      <ClipboardPaste className="w-4 h-4 text-[#0052ff]" />
+                      <span>Autocompletar con comprobante</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPasteBox((prev) => !prev)}
+                      className="text-[11px] font-bold text-[#0052ff] hover:underline cursor-pointer"
+                    >
+                      {showPasteBox ? 'Ocultar' : 'Pegar texto'}
+                    </button>
+                  </div>
+
+                  {showPasteBox ? (
+                    <div className="space-y-2 pt-1">
+                      <textarea
+                        rows={2}
+                        value={pastedText}
+                        onChange={(e) => setPastedText(e.target.value)}
+                        placeholder="Pega el mensaje de Bancolombia, Nequi, Daviplata o PSE..."
+                        className="w-full p-2.5 rounded-[12px] border border-[#dedfe2] bg-[#ffffff] text-xs font-medium text-[#0a0b0d] focus:ring-2 focus:ring-[#0052ff] focus:outline-none placeholder:text-[#8a919e]"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleParseNotification(pastedText)}
+                          disabled={!pastedText.trim()}
+                          className="px-3 py-1.5 rounded-full bg-[#0052ff] text-[#ffffff] text-xs font-bold disabled:opacity-50 cursor-pointer"
+                        >
+                          Extraer datos
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-[#5b616e]">
+                      Reconoce montos, fechas y comercios de SMS bancarios al instante y sin conexión.
+                    </p>
+                  )}
+
+                  {parsedNotificationSuccess && (
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#27ad75] bg-[#27ad75]/10 p-2 rounded-full border border-[#27ad75]/20">
+                      <Check className="w-3.5 h-3.5" />
+                      <span>{parsedNotificationSuccess}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Duplicate Warning Alert */}
+              {potentialDuplicates.length > 0 && (
+                <div className="p-3 rounded-[16px] bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#0a0b0d] space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#b45309]">
+                    <AlertTriangle className="w-4 h-4 text-[#f59e0b] shrink-0" />
+                    <span>Posible gasto duplicado detectado</span>
+                  </div>
+                  <p className="text-[11px] text-[#5b616e] leading-snug">
+                    {potentialDuplicates[0].reason}
+                  </p>
+                </div>
+              )}
+
               {/* Amount Highlight Input with $ Label */}
               <div className="bg-[#f7f8f9] text-[#0a0b0d] p-6 rounded-[24px] border border-[#dedfe2] text-center flex flex-col items-center justify-center gap-1">
                 <p className="text-[11px] font-semibold text-[#5b616e] uppercase tracking-wider">
@@ -259,6 +406,29 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                     className="text-4xl font-display font-extrabold text-[#0a0b0d] bg-transparent text-center focus:outline-none w-56 placeholder:text-[#8a919e]"
                   />
                 </div>
+              </div>
+
+              {/* Title input */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-[#5b616e] uppercase tracking-wider block">
+                    Descripción o detalle *
+                  </label>
+                  {autoMatchedCategory && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0052ff] bg-[#0052ff]/10 px-2 py-0.5 rounded-full border border-[#0052ff]/20">
+                      <Sparkles className="w-3 h-3" />
+                      Auto: {categories.find((c) => c.id === autoMatchedCategory.categoryId)?.name}
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: Mercado Éxito, Recibo Luz, Cena Crepes"
+                  value={title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-full border border-[#dedfe2] focus:ring-2 focus:ring-[#0052ff] focus:outline-none text-xs font-semibold text-[#0a0b0d] bg-[#ffffff]"
+                />
               </div>
 
               {/* Category Selector */}
@@ -298,21 +468,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                     💡 <strong>{currentCategory.name}:</strong> {currentCategory.definition}
                   </p>
                 )}
-              </div>
-
-              {/* Title input */}
-              <div>
-                <label className="text-xs font-semibold text-[#5b616e] uppercase tracking-wider block mb-1">
-                  Descripción o detalle *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Mercado Éxito, Recibo Luz, Cena"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-full border border-[#dedfe2] focus:ring-2 focus:ring-[#0052ff] focus:outline-none text-xs font-semibold text-[#0a0b0d] bg-[#ffffff]"
-                />
               </div>
 
               {/* Who Paid & Date */}
@@ -365,7 +520,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={() => setSplitType('50_50')}
-                    className={`flex-1 py-2 px-2 rounded-full border text-xs font-semibold transition-all ${
+                    className={`flex-1 py-2 px-2 rounded-full border text-xs font-semibold transition-all cursor-pointer ${
                       splitType === '50_50'
                         ? 'border-[#0052ff] bg-[#0052ff] text-[#ffffff]'
                         : 'border-[#dedfe2] bg-[#ffffff] text-[#5b616e] hover:border-[#0a0b0d]'
@@ -377,7 +532,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={() => setSplitType('CUSTOM')}
-                    className={`flex-1 py-2 px-2 rounded-full border text-xs font-semibold transition-all ${
+                    className={`flex-1 py-2 px-2 rounded-full border text-xs font-semibold transition-all cursor-pointer ${
                       splitType === 'CUSTOM'
                         ? 'border-[#0052ff] bg-[#0052ff] text-[#ffffff]'
                         : 'border-[#dedfe2] bg-[#ffffff] text-[#5b616e] hover:border-[#0a0b0d]'
@@ -405,7 +560,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
                     return (
                       <div key={m.id} className="py-1.5 mb-[10px] pb-[10px] border-b last:border-b-0 border-[#dedfe2]/40">
-                        {/* Main row: avatar, name, percentage, amount all centered horizontally in a single line */}
                         <div className="flex items-center justify-between text-xs gap-2">
                           <div className="flex items-center gap-2 min-w-0 flex-1">
                             <img
@@ -454,7 +608,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                           )}
                         </div>
 
-                        {/* (Pagó) badge positioned directly below the line, aligned vertically with user name to the left */}
                         {isPayer && (
                           <div className="pl-[38px] mt-1">
                             <span className="inline-block text-[9.5px] leading-tight font-semibold text-[#0052ff] bg-[#0052ff]/10 px-2 py-0.5 rounded-full border border-[#0052ff]/20">
@@ -466,7 +619,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                     );
                   })}
 
-                  {/* Validation warning if custom sum != 100% */}
                   {splitType === 'CUSTOM' && !isCustomValid && (
                     <div className="flex items-center justify-between gap-2 p-2.5 rounded-[12px] bg-[#f0616d]/10 border border-[#f0616d]/20 text-[#f0616d] text-xs font-semibold">
                       <div className="flex items-center gap-1.5 min-w-0">
@@ -544,5 +696,3 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
     </AnimatePresence>
   );
 };
-
-

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Scale, CheckCircle2, ArrowRight, ShieldCheck, Download, Loader2 } from 'lucide-react';
+import { X, Scale, CheckCircle2, ArrowRight, ShieldCheck, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Expense, Member } from '../../types';
 import { formatAmount, formatDisplayName } from '../../utils/format';
+import { calculateDebtSimplification } from '../../utils/debtSimplifier';
 
 interface SettleModalProps {
   isOpen: boolean;
@@ -27,46 +28,8 @@ export const SettleModal: React.FC<SettleModalProps> = ({
   const [settledSuccess, setSettledSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Calculate total spent & breakdown per member
-  const totalSpent = expenses.reduce((acc, e) => acc + e.amount, 0);
-
-  // Paid by each member
-  const paidMap: Record<string, number> = {};
-  // Owed share by each member
-  const owedMap: Record<string, number> = {};
-
-  members.forEach((m) => {
-    paidMap[m.id] = 0;
-    owedMap[m.id] = 0;
-  });
-
-  expenses.forEach((e) => {
-    if (paidMap[e.paidById] !== undefined) {
-      paidMap[e.paidById] += e.amount;
-    }
-    e.splits.forEach((s) => {
-      if (owedMap[s.memberId] !== undefined) {
-        owedMap[s.memberId] += s.amount;
-      }
-    });
-  });
-
-  // Calculate net balances: net = paid - share
-  // If net > 0, member is owed money. If net < 0, member owes money.
-  const netBalances = members.map((m) => {
-    const paid = paidMap[m.id] || 0;
-    const share = owedMap[m.id] || 0;
-    return {
-      member: m,
-      paid,
-      share,
-      net: paid - share,
-    };
-  });
-
-  // Find debtor and creditor for simple 2-person or pairwise settlement
-  const debtors = netBalances.filter((b) => b.net < -0.01);
-  const creditors = netBalances.filter((b) => b.net > 0.01);
+  // Deterministic Min-Cash-Flow Debt Simplification Algorithm
+  const { totalSpent, memberBalances, transactions } = calculateDebtSimplification(members, expenses);
 
   const handleConfirmSettle = () => {
     if (isSubmitting || expenses.length === 0) return;
@@ -112,7 +75,7 @@ export const SettleModal: React.FC<SettleModalProps> = ({
               </div>
               <button
                 onClick={onClose}
-                className="p-1 rounded-full hover:bg-[#f7f8f9] text-[#0a0b0d] transition-colors"
+                className="p-1 rounded-full hover:bg-[#f7f8f9] text-[#0a0b0d] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -155,7 +118,7 @@ export const SettleModal: React.FC<SettleModalProps> = ({
                       Aportes vs. Cuota correspondiente:
                     </p>
                     <div className="space-y-2">
-                      {netBalances.map((b) => (
+                      {memberBalances.map((b) => (
                         <div
                           key={b.member.id}
                           className="p-4 rounded-[16px] bg-[#ffffff] border border-[#dedfe2] space-y-1.5"
@@ -168,7 +131,7 @@ export const SettleModal: React.FC<SettleModalProps> = ({
                                 className="w-6 h-6 rounded-full object-cover border border-[#dedfe2]"
                               />
                               <span className="text-xs font-bold text-[#0a0b0d]">
-                                {formatDisplayName(b.member.name)}
+                                {formatDisplayName(b.member.name)} {b.member.id === currentMember.id ? '(Tú)' : ''}
                               </span>
                             </div>
                             <span
@@ -197,43 +160,39 @@ export const SettleModal: React.FC<SettleModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Settlement Net Debt Card */}
+                  {/* Settlement Net Debt Card - Min Cash Flow */}
                   <div className="bg-[#f7f8f9] p-4 rounded-[16px] border border-[#dedfe2] space-y-2.5">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0a0b0d] uppercase tracking-wider">
-                      <span>Transferencias recomendadas:</span>
+                    <div className="flex items-center justify-between text-xs font-semibold text-[#0a0b0d] uppercase tracking-wider">
+                      <span>Transferencias mínimas calculadas:</span>
+                      <span className="text-[10px] text-[#5b616e] font-normal lowercase">
+                        {transactions.length} {transactions.length === 1 ? 'operación' : 'operaciones'}
+                      </span>
                     </div>
 
-                    {debtors.length === 0 && creditors.length === 0 ? (
+                    {transactions.length === 0 ? (
                       <p className="text-xs font-semibold text-[#5b616e]">
                         ¡No hay deudas pendientes! El balance de todos los integrantes está exactamente en $0.
                       </p>
                     ) : (
-                      debtors.map((d) =>
-                        creditors.map((c) => {
-                          const amountToPay = Math.min(Math.abs(d.net), c.net);
-                          if (amountToPay <= 0) return null;
-
-                          return (
-                            <div
-                              key={`${d.member.id}-${c.member.id}`}
-                              className="flex items-center justify-between bg-[#ffffff] p-3 rounded-full border border-[#dedfe2]"
-                            >
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-semibold text-[#0a0b0d]">
-                                  {formatDisplayName(d.member.name)}
-                                </span>
-                                <ArrowRight className="w-4 h-4 text-[#0052ff]" />
-                                <span className="text-xs font-semibold text-[#0a0b0d]">
-                                  {formatDisplayName(c.member.name)}
-                                </span>
-                              </div>
-                              <span className="text-sm font-bold text-[#0052ff]">
-                                {formatAmount(amountToPay, currency)}
-                              </span>
-                            </div>
-                          );
-                        })
-                      )
+                      transactions.map((tx) => (
+                        <div
+                          key={tx.id}
+                          className="flex items-center justify-between bg-[#ffffff] p-3 rounded-full border border-[#dedfe2]"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-[#0a0b0d]">
+                              {formatDisplayName(tx.from.name)} {tx.from.id === currentMember.id ? '(Tú)' : ''}
+                            </span>
+                            <ArrowRight className="w-4 h-4 text-[#0052ff]" />
+                            <span className="text-xs font-semibold text-[#0a0b0d]">
+                              {formatDisplayName(tx.to.name)} {tx.to.id === currentMember.id ? '(Tú)' : ''}
+                            </span>
+                          </div>
+                          <span className="text-sm font-bold text-[#0052ff]">
+                            {formatAmount(tx.amount, currency)}
+                          </span>
+                        </div>
+                      ))
                     )}
                   </div>
 
@@ -282,4 +241,3 @@ export const SettleModal: React.FC<SettleModalProps> = ({
     </AnimatePresence>
   );
 };
-

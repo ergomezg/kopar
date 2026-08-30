@@ -698,6 +698,7 @@ export default function App() {
         members={members}
         currentMember={currentMember}
         currency={household.currency}
+        existingExpenses={expenses}
       />
 
       <InviteModal

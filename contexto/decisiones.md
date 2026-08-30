@@ -11,6 +11,7 @@ Este documento consolida las decisiones fundamentales tomadas durante el diseño
 | **001** | 2026-08-01 | Sistema de Diseño Light Mode de Alto Contraste (Estilo Coinbase) | Aceptado | [`001-sistema-diseno-luz-alto-contraste.md`](../decisions/001-sistema-diseno-luz-alto-contraste.md) |
 | **002** | 2026-08-05 | Modelo de Datos para Categorías, Gastos y Reglas de División | Aceptado | [`002-modelo-datos-y-divisiones.md`](../decisions/002-modelo-datos-y-divisiones.md) |
 | **003** | 2026-08-15 | Persistencia en LocalStorage y Sanitización de Datos Iniciales | Aceptado | [`003-persistencia-localstorage-y-sanitizacion.md`](../decisions/003-persistencia-localstorage-y-sanitizacion.md) |
+| **004** | 2026-08-30 | Arquitectura Zero-AI y Automatización Financiera Determinista | Aceptado | [`004-arquitectura-zero-ai-automatizacion-determinista.md`](../decisions/004-arquitectura-zero-ai-automatizacion-determinista.md) |
 
 ---
 
@@ -27,3 +28,7 @@ Este documento consolida las decisiones fundamentales tomadas durante el diseño
 ### ADR 003: Persistencia en LocalStorage y Sanitización de Datos
 - **Problema:** Datos residuales en el navegador causaban corrupción de datos (múltiples administradores o reaparición del usuario ficticio "Alex").
 - **Solución:** Al hidratar el estado en `App.tsx`, filtrar miembros obsoletos y forzar la regla de **Exactamente 1 Administrador** en el hogar. Formatear nombres completos a estándar "Nombre + Inicial del apellido" con `formatDisplayName`.
+
+### ADR 004: Arquitectura Zero-AI y Automatización Financiera Determinista
+- **Problema:** El uso de LLMs / Gemini API para operaciones financieras generaba alta latencia (800-5000ms), dependencia de red (sin offline), costo recurrente por token y riesgo de alucinación numérica en balances.
+- **Solución:** Desacoplar completamente el SDK `@google/genai` y reemplazar todas las tareas por algoritmos locales deterministas: Trie/Keyword Matcher para categorías (`categoryMatcher.ts`), Min-Cash-Flow Greedy Solver para liquidación (`debtSimplifier.ts`), Regex Parser para comprobantes bancarios (`receiptParser.ts`), detector de duplicados (`duplicateDetector.ts`) y motor de insights financieros (`budgetInsights.ts`).
