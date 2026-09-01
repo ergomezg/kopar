@@ -1,4 +1,4 @@
-# KOPAR — Finanzas Compartidas para el Hogar
+﻿# KOPAR — Finanzas Compartidas para el Hogar
 
 <div align="center">
 
