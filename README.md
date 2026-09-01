@@ -6,17 +6,18 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-6.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![Zero AI](https://img.shields.io/badge/Architecture-Zero--AI%20Deterministic-27AD75?style=for-the-badge&logo=fastapi&logoColor=white)
 
 <p align="center">
   <strong>Gestión transparente, colaborativa y equitativa de gastos del hogar, presupuestos por categorías y liquidación de saldos entre convivientes.</strong>
 </p>
 
-[Demostración](#-instalación-y-ejecución-local) •
-[Características](#-características-principales) •
-[Stack Tecnológico](#%EF%B8%8F-stack-tecnológico) •
-[Estructura](#-estructura-del-proyecto) •
-[Principios de Diseño](#-principios-de-diseño-y-ux)
+[Demostración](#🚀-instalación-y-ejecución-local) •
+[Características](#✨-características-principales) •
+[Stack Tecnológico](#🛠️-stack-tecnológico) •
+[Estructura](#📂-estructura-del-proyecto) •
+[Principios de Diseño](#🎨-principios-de-diseño-y-ux)
 
 </div>
 
@@ -24,16 +25,16 @@
 
 ## 📖 Tabla de Contenidos
 
-- [Acerca del Proyecto](#-acerca-del-proyecto)
-- [Características Principales](#-características-principales)
-- [Stack Tecnológico](#%EF%B8%8F-stack-tecnológico)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Instalación y Ejecución Local](#-instalación-y-ejecución-local)
-- [Variables de Entorno](#-variables-de-entorno)
-- [Scripts Disponibles](#-scripts-disponibles)
-- [Principios de Diseño y UX](#-principios-de-diseño-y-ux)
-- [Sistema de Memoria y Contexto (AI Agents)](#-sistema-de-memoria-y-contexto-ai-agents)
-- [Licencia](#-licencia)
+- [Acerca del Proyecto](#🏠-acerca-del-proyecto)
+- [Características Principales](#✨-características-principales)
+- [Stack Tecnológico](#🛠️-stack-tecnológico)
+- [Estructura del Proyecto](#📂-estructura-del-proyecto)
+- [Instalación y Ejecución Local](#🚀-instalación-y-ejecución-local)
+- [Variables de Entorno](#🔑-variables-de-entorno)
+- [Scripts Disponibles](#📜-scripts-disponibles)
+- [Principios de Diseño y UX](#🎨-principios-de-diseño-y-ux)
+- [Sistema de Memoria y Contexto (AI Agents)](#🧠-sistema-de-memoria-y-contexto-ai-agents)
+- [Licencia](#📄-licencia)
 
 ---
 
@@ -45,7 +46,7 @@
 - **División inteligente y justa:** Opciones de repartición equitativa (50/50 o entre partes iguales) o proporcional a los ingresos reales de cada conviviente.
 - **Presupuestos y límites mensuales:** Monitoreo visual de gastos categorizados con alertas deterministas de sobrecosto.
 - **Liquidación sin estrés:** Algoritmo *Min-Cash-Flow* para minimizar el número de transferencias entre integrantes.
-- **Arquitectura Zero-AI Offline:** 100% lógica determinista con baja latencia (<1ms), cero alucinaciones y cero costos de inferencia.
+- **Arquitectura Zero-AI y Backend Híbrido:** 100% lógica determinista en el cliente combinada con Supabase para sincronización de datos y autenticación, logrando baja latencia, cero alucinaciones y cero costos de inferencia.
 
 ---
 
@@ -67,7 +68,7 @@
 ### 🤝 Gestión de Hogar y Liquidaciones
 - **Perfiles y Roles:** 1 Administrador por hogar con miembros activos y pendientes de invitación mediante código único.
 - **Módulo de Liquidación (Min-Cash-Flow):** Algoritmo de minimización de transacciones para saldar todas las deudas en el menor número de pagos posibles.
-- **Onboarding Wizard:** Flujo guiado de 4 pasos para configurar un nuevo hogar, moneda, integrantes, presupuesto y primer gasto.
+- **Sincronización con Supabase:** Datos almacenados y protegidos en la nube (PostgreSQL + RLS) con autenticación oficial.
 
 ---
 
@@ -76,6 +77,7 @@
 | Capa | Tecnología | Descripción |
 |---|---|---|
 | **Frontend Core** | [React 19](https://react.dev/) + [TypeScript 5.8](https://www.typescriptlang.org/) | Tipado estricto y componentes funcionales modernos. |
+| **Backend & Auth** | [Supabase](https://supabase.com/) | Base de datos PostgreSQL, autenticación y políticas RLS. |
 | **Bundler & Dev Server** | [Vite 6](https://vite.dev/) | HMR ultrarrápido y optimización de compilación. |
 | **Estilos & UI** | [Tailwind CSS v4](https://tailwindcss.com/) (`@tailwindcss/vite`) | Estilizado atómico con tokens de diseño centralizados. |
 | **Animaciones** | [Motion](https://motion.dev/) (`motion/react`) | Transiciones fluidas y micro-interacciones. |
@@ -97,28 +99,24 @@ kopar/
 │   ├── current-state.md   # Estado funcional actual del proyecto
 │   ├── roadmap-and-pending.md # Tareas pendientes y próximos hitos
 │   └── blockers.md        # Bloqueos y dependencias críticas
+├── supabase/              # Configuración y esquemas de base de datos
+│   └── schema.sql         # Script DDL con tablas, constraints y políticas RLS
 ├── src/
 │   ├── components/        # Componentes modulares de la interfaz
 │   │   ├── auth/          # Autenticación, bienvenida y OnboardingWizard
 │   │   ├── budget/        # Componentes específicos del presupuesto
 │   │   ├── modals/        # Modales (AddExpense, Settle, Invite, EditBudget, etc.)
 │   │   ├── tabs/          # Pestañas principales (Actividad, Presupuesto, Hogar)
-│   │   ├── ui/            # Elementos base de UI
-│   │   ├── BalanceCard.tsx    # Tarjeta principal de balance y portada
-│   │   ├── BottomNavigation.tsx # Barra de navegación inferior
-│   │   ├── Header.tsx         # Encabezado sticky con alertas e invitaciones
-│   │   ├── QuickActions.tsx   # Acciones rápidas (Gasto, Liquidar, Invitar)
-│   │   └── RecentActivity.tsx # Feed de últimos movimientos
+│   │   └── ui/            # Elementos base de UI
 │   ├── constants/         # Tokens de tema y valores estáticos
-│   ├── utils/             # Utilidades (formato de moneda es-CO, Min-Cash-Flow, CategoryMatcher, ReceiptParser, BudgetInsights, DuplicateDetector)
+│   ├── lib/               # Clientes de terceros (ej. supabase.ts)
+│   ├── services/          # Servicios externos (ej. trm.ts)
+│   ├── utils/             # Utilidades deterministas (Min-Cash-Flow, Parser, etc.)
 │   ├── data.ts            # Datos iniciales y mocks tipados
 │   ├── types.ts           # Definición de interfaces y tipos TypeScript
 │   ├── App.tsx            # Componente raíz y control de estado
 │   ├── index.css          # Importaciones de Tailwind CSS v4
 │   └── main.tsx           # Punto de entrada de React 19
-├── package.json           # Dependencias y scripts de ejecución
-├── tsconfig.json          # Configuración del compilador TypeScript
-└── vite.config.ts         # Configuración de Vite con soporte Tailwind v4
 ```
 
 ---
@@ -128,6 +126,7 @@ kopar/
 ### Prerrequisitos
 - [Node.js](https://nodejs.org/) (versión 18.0 o superior recomendada)
 - Gestor de paquetes: `npm`, `pnpm` o `bun`
+- Proyecto en Supabase (Base de datos y Autenticación)
 
 ### Pasos
 
@@ -142,7 +141,14 @@ kopar/
    npm install
    ```
 
-3. **Iniciar el servidor de desarrollo:**
+3. **Configurar Supabase:**
+   Copia el archivo `.env.example` a `.env.local` y agrega tus credenciales:
+   ```bash
+   VITE_SUPABASE_URL="tu_supabase_url"
+   VITE_SUPABASE_ANON_KEY="tu_supabase_anon_key"
+   ```
+
+4. **Iniciar el servidor de desarrollo:**
    ```bash
    npm run dev
    ```
@@ -152,11 +158,11 @@ kopar/
 
 ## 🔑 Variables de Entorno
 
-Copia el archivo `.env.example` a `.env.local` si deseas personalizar la URL de la aplicación:
-
 | Variable | Requerida | Descripción |
 |---|---|---|
-| `APP_URL` | Opcional | URL base de la aplicación (usado en despliegues en producción o callbacks). |
+| `VITE_SUPABASE_URL` | Sí | URL del proyecto de Supabase. |
+| `VITE_SUPABASE_ANON_KEY` | Sí | Clave anónima pública de Supabase. |
+| `APP_URL` | Opcional | URL base de la aplicación. |
 
 ---
 
@@ -164,10 +170,10 @@ Copia el archivo `.env.example` a `.env.local` si deseas personalizar la URL de 
 
 En el directorio del proyecto puedes ejecutar:
 
-- `npm run dev`: Inicia el servidor de desarrollo con Vite en `http://localhost:3000`.
-- `npm run build`: Compila la aplicación para producción en la carpeta `dist/`.
+- `npm run dev`: Inicia el servidor de desarrollo con Vite.
+- `npm run build`: Compila la aplicación para producción.
 - `npm run preview`: Previsualiza localmente el *build* de producción.
-- `npm run lint`: Ejecuta el verificador de tipos de TypeScript (`tsc --noEmit`).
+- `npm run lint`: Ejecuta el verificador de tipos de TypeScript.
 
 ---
 
