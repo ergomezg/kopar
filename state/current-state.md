@@ -1,8 +1,8 @@
 # Estado Actual del Proyecto KOPAR
 
-- **Última actualización:** 2026-08-30
-- **Versión:** 0.2.0-beta (Zero-AI Architecture)
-- **Stack:** React 19, TypeScript ~5.8, Tailwind CSS v4 (`@tailwindcss/vite`), Vite 6, Motion (`motion/react`), Lucide React, Recharts.
+- **Última actualización:** 2026-09-01
+- **Versión:** 0.2.0-beta (Zero-AI Architecture - Tested)
+- **Stack:** React 19, TypeScript ~5.8, Tailwind CSS v4 (`@tailwindcss/vite`), Vite 6, Motion (`motion/react`), Lucide React, Recharts, Vitest.
 
 ---
 
@@ -23,7 +23,7 @@
 | **AddExpenseModal** | `src/components/modals/AddExpenseModal.tsx` | Estable | Autocategorización determinista (`categoryMatcher.ts`), detección de duplicados (`duplicateDetector.ts`) y parser de recibos (`receiptParser.ts`). |
 | **SettleModal** | `src/components/modals/SettleModal.tsx` | Estable | Liquidación con algoritmo Min-Cash-Flow (`debtSimplifier.ts`) para minimizar transacciones. |
 | **Design System Tokens** | `src/constants/theme.ts` & `design.md` | Estable | Tokens de colores, radios y fuentes centralizados. |
-| **Motores Deterministas (Zero-AI)** | `src/utils/` | Estable | `categoryMatcher.ts`, `debtSimplifier.ts`, `receiptParser.ts`, `budgetInsights.ts`, `duplicateDetector.ts`. |
+| **Motores Deterministas (Zero-AI)** | `src/utils/` | Estable (Testeados 100%) | `categoryMatcher.ts`, `debtSimplifier.ts`, `receiptParser.ts`, `budgetInsights.ts`, `duplicateDetector.ts` cuentan con pruebas unitarias (`vitest`). |
 | **Cliente de Supabase (Fase 1)** | `src/lib/supabase.ts` | Estable | Cliente oficial conectado a Supabase para DB, Auth y Storage. |
 | **Servicio TRM (Fase 1)** | `src/services/trm.ts` | Estable | Fetch a SODA API (datos.gov.co) con caché local de 24 horas. |
 | **Esquema DB (Fase 1)** | `supabase/schema.sql` | Estable | Script DDL con tablas, constraints y políticas RLS para Supabase. |

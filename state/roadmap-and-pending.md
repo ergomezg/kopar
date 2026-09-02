@@ -18,4 +18,6 @@
 
 ## 2. Mejoras de Calidad de Código y Arquitectura
 - Modularizar `App.tsx` (extraer gestores de estado a custom hooks como `useHousehold`, `useExpenses`, `useAuth`).
-- Añadir tests unitarios para utilidades de cálculo determinista (`debtSimplifier.ts`, `categoryMatcher.ts`, `receiptParser.ts`, `budgetInsights.ts`).
+- **[x]** Añadir tests unitarios para motores de Fase 1 (`categoryMatcher.ts`, `duplicateDetector.ts`, `budgetInsights.ts`).
+- **[x]** Añadir tests unitarios para utilidades Core (`debtSimplifier.ts`).
+- **[x]** Implementar el parser de recibos con Regex (`receiptParser.ts`) estipulado en la Fase 2 del plan Zero-AI.

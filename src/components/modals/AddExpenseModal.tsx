@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, DollarSign, Calendar, Upload, AlertCircle, Check, Percent, Loader2, ChevronDown, ClipboardPaste, Sparkles, AlertTriangle } from 'lucide-react';
+import { X, DollarSign, Calendar, Upload, AlertCircle, Check, Percent, Loader2, ChevronDown, Sparkles, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Category, Expense, Member, SplitType } from '../../types';
 import { formatAmount, formatDisplayName } from '../../utils/format';
 import { matchCategoryFromTitle, MatchResult } from '../../utils/categoryMatcher';
 import { detectPotentialDuplicates, DuplicateMatch } from '../../utils/duplicateDetector';
-import { parseReceiptText, ParsedReceipt } from '../../utils/receiptParser';
 
 interface AddExpenseModalProps {
   isOpen: boolean;
@@ -44,11 +43,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
   // Auto-categorization state
   const [autoMatchedCategory, setAutoMatchedCategory] = useState<MatchResult | null>(null);
   const [hasManuallySelectedCategory, setHasManuallySelectedCategory] = useState(false);
-
-  // Clipboard / Text notification parsing state
-  const [showPasteBox, setShowPasteBox] = useState(false);
-  const [pastedText, setPastedText] = useState('');
-  const [parsedNotificationSuccess, setParsedNotificationSuccess] = useState<string | null>(null);
 
   // Selected category object
   const currentCategory = categories.find((c) => c.id === categoryId) || categories[0];
@@ -93,9 +87,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
       setReceiptFileName(null);
       setHasManuallySelectedCategory(false);
       setAutoMatchedCategory(null);
-      setShowPasteBox(false);
-      setPastedText('');
-      setParsedNotificationSuccess(null);
     }
   }, [isOpen, initialExpense, categories, currentMember.id]);
 
@@ -154,36 +145,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
       existingExpenses
     );
   }, [isOpen, title, numAmount, categoryId, date, paidById, initialExpense?.id, existingExpenses]);
-
-  // Fast Deterministic Text / Notification Parser Handler
-  const handleParseNotification = (textToParse: string) => {
-    const result = parseReceiptText(textToParse);
-    if (result) {
-      if (result.amount) setAmount(result.amount.toString());
-      if (result.title) setTitle(result.title);
-      if (result.date) setDate(result.date);
-      if (result.categoryId) {
-        setCategoryId(result.categoryId);
-        setHasManuallySelectedCategory(false);
-      }
-      setParsedNotificationSuccess(`Comprobante ${result.sourceType || ''} extraído con éxito.`);
-      setShowPasteBox(false);
-      setPastedText('');
-    }
-  };
-
-  const handleClipboardPasteDirect = async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.readText) {
-        const clipboardText = await navigator.clipboard.readText();
-        if (clipboardText) {
-          handleParseNotification(clipboardText);
-        }
-      }
-    } catch {
-      setShowPasteBox(true);
-    }
-  };
 
   // Compute calculated splits based on split type with exact accounting rounding compensation
   const calculateSplits = () => {
@@ -323,58 +284,6 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
             {/* Modal Body */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
-              {/* Notification Parser Quick Action */}
-              {!initialExpense && (
-                <div className="bg-[#f7f8f9] border border-[#dedfe2] rounded-[16px] p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0a0b0d]">
-                      <ClipboardPaste className="w-4 h-4 text-[#0052ff]" />
-                      <span>Autocompletar con comprobante</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowPasteBox((prev) => !prev)}
-                      className="text-[11px] font-bold text-[#0052ff] hover:underline cursor-pointer"
-                    >
-                      {showPasteBox ? 'Ocultar' : 'Pegar texto'}
-                    </button>
-                  </div>
-
-                  {showPasteBox ? (
-                    <div className="space-y-2 pt-1">
-                      <textarea
-                        rows={2}
-                        value={pastedText}
-                        onChange={(e) => setPastedText(e.target.value)}
-                        placeholder="Pega el mensaje de Bancolombia, Nequi, Daviplata o PSE..."
-                        className="w-full p-2.5 rounded-[12px] border border-[#dedfe2] bg-[#ffffff] text-xs font-medium text-[#0a0b0d] focus:ring-2 focus:ring-[#0052ff] focus:outline-none placeholder:text-[#8a919e]"
-                      />
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleParseNotification(pastedText)}
-                          disabled={!pastedText.trim()}
-                          className="px-3 py-1.5 rounded-full bg-[#0052ff] text-[#ffffff] text-xs font-bold disabled:opacity-50 cursor-pointer"
-                        >
-                          Extraer datos
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-[#5b616e]">
-                      Reconoce montos, fechas y comercios de SMS bancarios al instante y sin conexión.
-                    </p>
-                  )}
-
-                  {parsedNotificationSuccess && (
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#27ad75] bg-[#27ad75]/10 p-2 rounded-full border border-[#27ad75]/20">
-                      <Check className="w-3.5 h-3.5" />
-                      <span>{parsedNotificationSuccess}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* Duplicate Warning Alert */}
               {potentialDuplicates.length > 0 && (
                 <div className="p-3 rounded-[16px] bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#0a0b0d] space-y-1">
